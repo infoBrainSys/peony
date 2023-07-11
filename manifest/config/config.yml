@@ -1,0 +1,20 @@
+database:
+  user: root
+  password: Xx2580..
+  localhost: 127.0.0.1:3306
+  db: peony
+  option: charset=utf8mb4&parseTime=True&loc=Local
+
+jwt:
+  secret: peony
+  iss: peony
+  sub: peony
+
+redis:
+  addr: 127.0.0.1:6379
+  pass: ""
+  db: 0
+
+pay:
+  alipay:
+    app_id: 9021000123603301
