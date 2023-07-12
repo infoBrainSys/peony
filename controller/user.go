@@ -7,6 +7,7 @@ import (
 	consts "peony/const"
 	"peony/logic"
 	"peony/service"
+	"peony/utils"
 )
 
 // Register 注册逻辑
@@ -40,5 +41,14 @@ func Login(c *gin.Context) {
 		base.Response(http.StatusInternalServerError, consts.Failed, consts.LoginFailed)
 		return
 	}
-	// 登录成功逻辑在签发 IssueToken 后置中间键中执行
+	// 登录成功逻辑在 IssueToken 后置中间键中执行
+}
+
+// Logout 退出登录, 把 jwt token 加入黑名单
+func Logout(c *gin.Context) {
+	base := logic.NewBaseContext(c)
+	tokenStr := base.Ctx.Request.Header.Get("Authorization")[7:]
+	email, _ := service.JWT().GetEmail(tokenStr)
+
+	utils.RDB.Del(base.Ctx, tokenStr+email)
 }

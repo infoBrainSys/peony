@@ -9,6 +9,7 @@ jwt:
   secret: peony
   iss: peony
   sub: peony
+  exp: 1800 # 单位秒
 
 redis:
   addr: 127.0.0.1:6379

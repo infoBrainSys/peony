@@ -10,6 +10,7 @@ import (
 	"peony/utils"
 )
 
+// AuthUser 用户对保护资源进行操作时需要鉴别用户是否存在，PS：由于JwtToke 的无状态特性，防止用户在删除账号后仍然可使用 Token 进行敏感操作（TODO：待优化）
 func AuthUser(c *gin.Context) {
 	base := logic.NewBaseContext(c)
 	tkn := base.Ctx.Request.Header.Get("Authorization")[7:]

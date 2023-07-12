@@ -44,8 +44,6 @@ func (j *sJWT) IssueToken(email string) (tokenStr string, err error) {
 
 // AuthJwtToken 校验 Token
 func (j *sJWT) AuthJwtToken(tokenStr string) error {
-	// 裁剪掉 Bearer
-	tokenStr = tokenStr[7:]
 
 	token, err := jwtPkg.ParseWithClaims(tokenStr, &myClaims{}, func(token *jwtPkg.Token) (interface{}, error) {
 		return []byte(utils.V.GetString("jwt.secret")), nil
@@ -70,6 +68,7 @@ func (j *sJWT) AuthJwtToken(tokenStr string) error {
 	}
 }
 
+// GetEmail 从 Token 中提取 Email
 func (j *sJWT) GetEmail(tokenStr string) (email string, err error) {
 	token, err := jwtPkg.ParseWithClaims(tokenStr, &myClaims{}, func(token *jwtPkg.Token) (interface{}, error) {
 		return []byte(utils.V.GetString("jwt.secret")), nil

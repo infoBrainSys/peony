@@ -12,7 +12,14 @@ func RegisterRouter(app *gin.Engine) {
 	{
 		index.POST("/register", controller.Register)
 		index.POST("/login", middleware.IssueToken, controller.Login)
+		index.POST("/logout", middleware.AuthUser, middleware.AuthJwtToken, controller.Logout) // TODO 注销
 	}
+
+	// 用户组
+	//user := app.Group("/user")
+	//{
+	//	//user.DELETE("/signOut", controller.SignOut) // TODO 删除账号
+	//}
 
 	// 帖子组
 	post := app.Group("/post")
@@ -28,6 +35,5 @@ func RegisterRouter(app *gin.Engine) {
 	{
 		order.GET("/:peony", controller.Search)
 		//order.PUT("/check", controller.Check) // TODO 支付订单
-
 	}
 }
