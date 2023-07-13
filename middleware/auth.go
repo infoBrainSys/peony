@@ -26,6 +26,6 @@ func AuthUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	utils.RDB.Set(base.Ctx, "email", email, 0)
+	utils.RDB.Set(base.Ctx, "email", email, 300)
 	c.Next()
 }

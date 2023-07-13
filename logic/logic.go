@@ -3,6 +3,7 @@ package logic
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	_ "peony/logic/email"
 	_ "peony/logic/jwt"
 	_ "peony/logic/product"
 	_ "peony/logic/search"

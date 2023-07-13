@@ -1,3 +1,6 @@
+app:
+  name: peony
+
 database:
   user: root
   password: Xx2580..
@@ -19,3 +22,11 @@ redis:
 pay:
   alipay:
     app_id: 9021000123603301
+
+email:
+  name: peony
+  host: smtp.163.com
+  port: 465
+  username: scrooge335121@163.com
+  password: IAZIPPWQHXCUQOAX
+  codeExp: 300

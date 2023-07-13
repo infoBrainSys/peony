@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <style>
+        /* 样式代码省略 */
+
+        .title {
+            text-align: center;
+            font-size: 24px;
+            color: #66545e;
+            margin-bottom: 20px;
+        }
+
+        .circle {
+            width: 100px;
+            height: 100px;
+            background: #ecd1de;
+            border-radius: 50%;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+        }
+
+        body {
+            background-color: #ECD1DE;
+            font-family: Arial, sans-serif;
+        }
+
+        .verification-code {
+            width: 200px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .code-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .code-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ECD1DE;
+            box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #66545e;
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <div class="circle"></div>
+    <div class="verification-code">
+        <h3 class="title">邮箱验证码</h3>
+
+        <div class="code-grid">
+            {{range $i, $v := .code}}
+            <div class="code-cell">{{ $v }}</div>
+            {{end}}
+        </div>
+    </div>
+</body>
+
+</html>

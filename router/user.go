@@ -13,6 +13,7 @@ func RegisterRouter(app *gin.Engine) {
 		index.POST("/register", controller.Register)
 		index.POST("/login", middleware.IssueToken, controller.Login)
 		index.POST("/logout", middleware.AuthUser, middleware.AuthJwtToken, controller.Logout) // TODO 注销
+		index.POST("/sendCode", controller.SendEmail)
 	}
 
 	// 用户组
