@@ -1,35 +1,49 @@
 package cmd
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
 	"peony/router"
 	"peony/utils"
-	"peony/utils/email"
+	"time"
 )
 
 func init() {
-	// 初始化viper
-	utils.InitViper()
-
-	// 初始化数据库
-	utils.InitGorm()
-
-	// 初始化redis
-	utils.InitRedis()
-
-	// 初始化 UUID
-	utils.InitUUID()
-
-	// 初始化支付
-	utils.InitPay()
-
-	// 初始化邮件服务
-	email.InitEmail()
+	utils.NewUtilsBase()
 }
 
 func NewServer() {
 	app := gin.Default()
 	app.LoadHTMLGlob("utils/email/*.html")
 	router.RegisterRouter(app)
-	app.Run()
+
+	// 优雅启停
+	srv := http.Server{
+		Addr:           ":8080",
+		Handler:        app,
+		MaxHeaderBytes: 1 << 20,
+		ReadTimeout:    time.Second * 10,
+		WriteTimeout:   time.Second * 10,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatalf("listen:%s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, os.Kill)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown: %s", err)
+	}
+	log.Println("Server exiting...")
 }
