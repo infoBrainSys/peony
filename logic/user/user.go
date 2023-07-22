@@ -40,7 +40,7 @@ func (u *sUser) Register(ctx context.Context, in *v1.RegisterReq) error {
 	return utils.DB.Create(&user).Error
 }
 
-// Login 用户登录 TODO 有坑待修复
+// Login 用户登录
 func (u *sUser) Login(ctx context.Context, in *v1.LoginReq, emailCh chan string) error {
 	m := u.search(in)
 	if m.Email != in.Email {

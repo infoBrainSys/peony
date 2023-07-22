@@ -62,7 +62,10 @@ func Login(c *gin.Context) {
 	}
 
 	// 签发token
-	token, err := service.JWT().IssueToken(<-emailCh)
+	email := <-emailCh
+	token, err := service.JWT().IssueToken(email)
+
+	defer utils.RDB.Set(base.Ctx, email+token, email+token, utils.V.GetDuration("jwt.exp")*time.Second)
 	if err != nil {
 		base.AbortWithStatus(http.StatusInternalServerError, consts.Failed, err)
 		return

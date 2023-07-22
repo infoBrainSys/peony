@@ -12,7 +12,7 @@ func RegisterRouter(app *gin.Engine) {
 	{
 		index.POST("/register", controller.Register)
 		index.POST("/login", controller.Login)
-		index.POST("/logout", middleware.AuthUser, middleware.AuthJwtToken, controller.Logout) // TODO 注销
+		index.POST("/logout", middleware.AuthJwtToken, controller.Logout) // TODO 注销
 		index.POST("/sendCode", controller.SendEmail)
 	}
 
@@ -24,7 +24,7 @@ func RegisterRouter(app *gin.Engine) {
 
 	// 帖子组
 	post := app.Group("/post")
-	post.Use(middleware.AuthUser, middleware.AuthJwtToken)
+	post.Use(middleware.AuthJwtToken)
 	{
 		post.POST("/publish", controller.Publish)
 	}
@@ -39,7 +39,7 @@ func RegisterRouter(app *gin.Engine) {
 
 	order := app.Group("/order")
 	{
-		order.PUT("/check", middleware.AuthUser, middleware.AuthJwtToken, controller.Check)
+		order.PUT("/check", middleware.AuthJwtToken, controller.Check)
 		order.GET("/notify", controller.ParseNotify)
 	}
 }
