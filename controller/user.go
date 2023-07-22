@@ -8,7 +8,6 @@ import (
 	"peony/logic"
 	"peony/service"
 	"peony/utils"
-	"peony/utils/email"
 	"time"
 )
 
@@ -48,17 +47,28 @@ func Register(c *gin.Context) {
 func Login(c *gin.Context) {
 	base := logic.NewBaseContext(c)
 	var loginReq v1.LoginReq
-	err := base.Ctx.ShouldBind(&loginReq)
-	if err != nil {
-		base.Response(http.StatusBadRequest, consts.Failed, consts.LoginFailed)
+	emailCh := make(chan string, 1)
+
+	// 绑定用户输入
+	if err := base.Ctx.ShouldBind(&loginReq); err != nil {
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, err)
 		return
 	}
-	err = service.User().Login(c, &loginReq)
-	if err != nil {
-		base.Response(http.StatusInternalServerError, consts.Failed, consts.LoginFailed)
+
+	// 校验登录
+	if err := service.User().Login(base.Ctx, &loginReq, emailCh); err != nil {
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, err)
 		return
 	}
-	// 登录成功逻辑在 IssueToken 后置中间键中执行
+
+	// 签发token
+	token, err := service.JWT().IssueToken(<-emailCh)
+	if err != nil {
+		base.AbortWithStatus(http.StatusInternalServerError, consts.Failed, err)
+		return
+	}
+
+	base.To("/").Response(http.StatusOK, consts.Success, token, consts.LoginSuccess).Redirect()
 }
 
 // Logout 退出登录, 把 redis 中的 token 删除（加入黑名单）
@@ -88,7 +98,7 @@ func SendEmail(c *gin.Context) {
 		return
 	}
 
-	err = email.SendEmail(sendEmailReq.Email, files)
+	err = utils.SendEmail(sendEmailReq.Email, files)
 	// redis 验证码键组合：邮箱+验证码
 	defer utils.RDB.Set(base.Ctx,
 		sendEmailReq.Email+code,

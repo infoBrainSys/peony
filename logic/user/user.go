@@ -40,18 +40,16 @@ func (u *sUser) Register(ctx context.Context, in *v1.RegisterReq) error {
 	return utils.DB.Create(&user).Error
 }
 
-func (u *sUser) Login(ctx context.Context, in *v1.LoginReq) error {
+// Login 用户登录 TODO 有坑待修复
+func (u *sUser) Login(ctx context.Context, in *v1.LoginReq, emailCh chan string) error {
 	m := u.search(in)
-
-	err := utils.NewDeHash([]byte(m.Password), []byte(in.Password))
-	fmt.Println(err)
-	if in.Email == m.Email && err == nil {
-		// 登录成功
-		utils.RDB.MSet(ctx, "email", in.Email, "err", nil)
-		return nil
+	if m.Email != in.Email {
+		return errors.New("用户不存在")
+	} else if err := utils.NewDeHash([]byte(m.Password), []byte(in.Password)); err != nil {
+		return errors.New("密码错误")
 	} else {
-		utils.RDB.MSet(ctx, "email", nil, "err", err.Error())
-		return err
+		emailCh <- m.Email
+		return nil
 	}
 }
 

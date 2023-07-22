@@ -11,7 +11,7 @@ func RegisterRouter(app *gin.Engine) {
 	index := app.Group("/")
 	{
 		index.POST("/register", controller.Register)
-		index.POST("/login", middleware.IssueToken, controller.Login)
+		index.POST("/login", controller.Login)
 		index.POST("/logout", middleware.AuthUser, middleware.AuthJwtToken, controller.Logout) // TODO 注销
 		index.POST("/sendCode", controller.SendEmail)
 	}
@@ -27,14 +27,19 @@ func RegisterRouter(app *gin.Engine) {
 	post.Use(middleware.AuthUser, middleware.AuthJwtToken)
 	{
 		post.POST("/publish", controller.Publish)
-		post.GET("/search", controller.Search)
+	}
+
+	// 搜索组，无需鉴权中间键
+	search := app.Group("/search")
+	{
+		search.GET("/", controller.Search)
 	}
 
 	// 订单组
+
 	order := app.Group("/order")
-	post.Use(middleware.AuthUser, middleware.AuthJwtToken)
 	{
-		order.GET("/:peony", controller.Search)
-		//order.PUT("/check", controller.Check) // TODO 支付订单
+		order.PUT("/check", middleware.AuthUser, middleware.AuthJwtToken, controller.Check)
+		order.GET("/notify", controller.ParseNotify)
 	}
 }

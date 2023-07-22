@@ -7,7 +7,7 @@ import (
 
 type (
 	IUser interface {
-		Login(ctx context.Context, in *v1.LoginReq) error
+		Login(ctx context.Context, in *v1.LoginReq, emailCh chan string) error
 		Register(ctx context.Context, in *v1.RegisterReq) error
 		UserExist(email string) bool
 	}
