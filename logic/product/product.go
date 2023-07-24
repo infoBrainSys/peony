@@ -1,11 +1,13 @@
 package product
 
 import (
-	"github.com/gin-gonic/gin"
-	"peony/api/v1"
+	v1 "peony/api/v1"
 	"peony/model"
 	"peony/service"
 	"peony/utils"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type sProduct struct {
@@ -29,8 +31,7 @@ func (p *sProduct) Publish(c *gin.Context, in *v1.ProductReq) error {
 		Title:   in.Title,
 		Content: in.Content,
 		Price:   in.Price,
-		Status:  1,
-		Peony:   utils.NewHashPeony(email + utils.UUID.String()),
+		Peony:   utils.NewHashPeony(email + time.Now().String()), // 使用（邮箱+时间戳）组合作为帖子唯一链接标识
 	}
 	// 发布帖子
 	return utils.DB.Create(&product).Error
