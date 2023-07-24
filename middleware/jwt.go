@@ -16,7 +16,7 @@ func AuthJwtToken(c *gin.Context) {
 	email, _ := service.JWT().GetEmail(token)
 
 	// 不存在则返回 err，如果 redis 中存在 token，则继续执行逻辑
-	err := utils.RDB.Get(base.Ctx, email+token).Err()
+	err := utils.RDB.Get(base.Ctx, email+"token").Err()
 	if err != nil {
 		base.To("/").AbortWithStatus(http.StatusUnauthorized, consts.Failed, consts.Unauthorized).Redirect()
 		return

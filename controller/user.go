@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"peony/api/v1"
@@ -18,27 +19,25 @@ func Register(c *gin.Context) {
 
 	err := base.Ctx.ShouldBind(&registerReq)
 	if err != nil {
-		base.Response(http.StatusBadRequest, consts.Failed, consts.RegisterFailed)
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, err)
 		return
 	}
 	if registerReq.Password != registerReq.ConfirmPassword {
-		base.Response(http.StatusBadRequest, consts.Failed, consts.PasswordNotMatch)
-		c.Abort()
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, errors.New(consts.PasswordNotMatch))
 		return
 	}
 	verifyCode, _ := utils.RDB.Get(base.Ctx, registerReq.Email+registerReq.Code).Result()
 	if registerReq.Code != verifyCode {
-		base.Response(http.StatusBadRequest, consts.Failed, consts.VerifyCodeWrong)
-		c.Abort()
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, errors.New(consts.VerifyCodeErr))
 		return
 	}
 
 	err = service.User().Register(c, &registerReq)
 	if err == nil {
-		base.To("/").Response(http.StatusOK, consts.Success, consts.RegisterSuccess).Redirect()
+		base.To("/login").Response(http.StatusOK, consts.Success, consts.RegisterSuccess).Redirect()
 		return
 	} else {
-		base.Response(http.StatusInternalServerError, consts.Failed, err.Error())
+		base.AbortWithStatus(http.StatusUnprocessableEntity, consts.Failed, errors.New(consts.UserExist))
 		return
 	}
 }
@@ -57,15 +56,16 @@ func Login(c *gin.Context) {
 
 	// 校验登录
 	if err := service.User().Login(base.Ctx, &loginReq, emailCh); err != nil {
-		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, err)
+		base.AbortWithStatus(http.StatusUnauthorized, consts.Failed, err)
 		return
 	}
 
 	// 签发token
 	email := <-emailCh
-	token, err := service.JWT().IssueToken(email)
+	tokenStr, err := service.JWT().IssueToken(email)
+	token := "Bearer " + tokenStr
 
-	defer utils.RDB.Set(base.Ctx, email+token, email+token, utils.V.GetDuration("jwt.exp")*time.Second)
+	defer utils.RDB.Set(base.Ctx, email+"token", email+token, utils.V.GetDuration("jwt.exp")*time.Second)
 	if err != nil {
 		base.AbortWithStatus(http.StatusInternalServerError, consts.Failed, err)
 		return
@@ -91,13 +91,13 @@ func SendEmail(c *gin.Context) {
 
 	err := base.Ctx.ShouldBind(&sendEmailReq)
 	if err != nil {
-		base.Response(http.StatusBadRequest, consts.Failed, consts.EmailIsNotValid)
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, consts.SendEmailFailed)
 		return
 	}
 
 	code, files, err := service.Email().ParseFiles()
 	if err != nil {
-		base.Response(http.StatusInternalServerError, consts.Failed, consts.SendEmailFailed)
+		base.AbortWithStatus(http.StatusInternalServerError, consts.Failed, consts.SendEmailFailed)
 		return
 	}
 
@@ -109,7 +109,7 @@ func SendEmail(c *gin.Context) {
 		time.Second*time.Duration(utils.V.GetInt64("email.codeExp")))
 
 	if err != nil {
-		base.Response(http.StatusInternalServerError, consts.Failed, consts.SendEmailFailed)
+		base.AbortWithStatus(http.StatusBadRequest, consts.Failed, consts.SendEmailFailed)
 		return
 	}
 	base.Response(http.StatusOK, consts.Success, consts.SendEmailSuccess, code)
